@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Image,
   Platform,
+  FlatList,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
@@ -47,15 +48,43 @@ const App = () => {
     axios.post(API_URL, formData, header);
   };
 
-  const renderImg = () => {
+  const deleteImage = item => {
+    const arr = imgf.filter(itemc => {
+      return item !== itemc;
+    });
+    setImage(arr);
+  };
+
+  const renderImage = item => {
+    return (
+      <View style={{marginTop: 10}}>
+        <Image
+          source={{
+            uri: item.uri,
+          }}
+          style={styles.img}
+        />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.img_closer}
+          onPress={() => deleteImage(item)}>
+          <View>
+            <Text style={{color: '#fff', fontSize: 15}}>X</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderItems = () => {
     if (imgf.length > 0) {
       return (
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          {imgf.map(d => {
-            console.log(d);
-            return <Image source={{uri: d.uri}} style={styles.img} />;
-          })}
-        </View>
+        <FlatList
+          keyExtractor={(item, index) => index.toString()}
+          data={imgf}
+          renderItem={item => renderImage(item.item)}
+          numColumns={3}
+        />
       );
     } else {
       return null;
@@ -84,7 +113,7 @@ const App = () => {
           </TouchableOpacity>
         </View>
 
-        {renderImg()}
+        {renderItems()}
 
         <View>
           <TouchableOpacity
@@ -122,6 +151,17 @@ const styles = StyleSheet.create({
     minHeight: 100,
     minWidth: 100,
     marginHorizontal: 10,
+  },
+  img_closer: {
+    position: 'absolute',
+    right: 0,
+    top: -10,
+    backgroundColor: '#000',
+    width: 30,
+    height: 30,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
